@@ -1,0 +1,1 @@
+g++ --std c++17 -pthread ./agents/Unified_Neural_Model.cpp ./agents/modules/Module.cpp ./agents/self_organized_systems/Novelty_Map.cpp ./environments/Virtual_Market.cpp ./random/State_of_Art_Random.cpp read_future_data.cpp main_my.cpp -o a -O4 -g
