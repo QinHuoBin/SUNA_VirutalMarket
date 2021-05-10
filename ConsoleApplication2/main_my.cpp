@@ -1,7 +1,9 @@
 ﻿
+
 #include "stdio.h"
 #include "stdlib.h"
 #include <time.h>
+#include <algorithm>
 
 //agents
 #include "agents/Unified_Neural_Model.h"
@@ -19,6 +21,8 @@ FILE *main_log_file;
 // //	A simple C++11 Thread Pool implementation.
 // // 		https://github.com/progschj/ThreadPool
 #include "ThreadPool.h"
+ThreadPool pool(16);
+
 //#include "omp.h"
 // https://github.com/lzpong/threadpool
 // #include "threadpool.h"
@@ -30,6 +34,23 @@ using std::chrono::milliseconds;
 
 #include <iostream>
 #define P(EX) std::cout << #EX << ": " << EX << std::endl;
+
+struct TradeHistory {
+	long long time;
+	double action;
+	int position_now;
+	int position_change_times = 0;
+	double reward;
+	double accum_reward;
+};
+
+struct ModuleInfo {
+	Module* the_module;
+	int generation;
+	float rank;// 排在种群的百分之几（第一1就是1.00，最末是0.0）
+	int index_in_population;
+	vector<TradeHistory> results;
+};
 
 double computeAverage(double *last_rewards, int counter)
 {
@@ -107,8 +128,126 @@ double aaaa(Unified_Neural_Model *agent, Virtual_Market *env, int the_individual
 	return accum_reward;
 }
 
+// 把测试结果保存下来
+void save_results_to_csv(vector<TradeHistory>& results, string &save_path)
+{
+	FILE* csv_file;
+	csv_file=fopen(save_path.c_str(), "w");
+
+	string header = "time,action,position_now,position_change_times,reward,accum_reward\n";
+	fwrite(header.c_str(), 1, header.size(), csv_file);
+
+	//printf("results.size()=%d\n", results.size());
+	for (TradeHistory & history : results) {
+		fprintf(csv_file, "%ld,%lf,%d,%d,%lf,%lf\n", history.time,history.action, history.position_now, history.position_change_times, history.reward, history.accum_reward);
+	}
+
+	fflush(csv_file);
+	fclose(csv_file);
+}
+
+/*
+测试单个module并保存结果
+*/
+double test_single_module(ModuleInfo& module_info,int index_in_env, Virtual_Market* env, string& save_path) {
+	//vector<pair<size_t, double>> results; //result：pair<time, accum_reward>
+	double accum_reward = 0;
+	double reward;
+
+	double action;
+
+	Module* module_be_test = module_info.the_module;
+
+	int position_last = 0;
+	int position_change_times = 0;
+	while (env->time[index_in_env]<env->price_size)
+	{
+		module_be_test->process(env->observations[index_in_env], &action);
+		reward = env->step(&action, index_in_env);
+		accum_reward += reward;
+		//results.push_back(pair<size_t, double>(env->time[index_in_env], accum_reward));
+
+		TradeHistory history;
+		history.time = env->time[index_in_env];
+		history.action = action;
+		history.position_now = env->position_hold[index_in_env];
+		if (position_last != history.position_now) {
+			position_change_times++;
+			position_last = history.position_now;
+		}
+		history.position_change_times = position_change_times;
+		history.reward = reward;
+		history.accum_reward = accum_reward;
+
+		module_info.results.push_back(history);
+	}
+
+	// 保存到文件中
+	save_results_to_csv(module_info.results, save_path);
+
+	return accum_reward;
+}
+
+// 测试切片
+void test_slices(vector<ModuleInfo> slices,Virtual_Market* env,string &base_path) {
+	// 一百一百切片进行测试
+	// todo:优化env的逻辑
+
+#ifdef _WIN32
+	string test_dir_name = "\\test\\";
+	system(("mkdir " + base_path + test_dir_name).c_str());
+#else
+	string test_dir_name = "/test/";
+	system(("mkdir -p " + base_path + test_dir_name).c_str());// -p 递归创建
+#endif
+
+	// 每批次测试在slices中的索引，即测试的索引为[start_index,end_index)
+	int start_index, end_index;
+	for (start_index = 0; start_index < slices.size(); start_index += SUBPOPULATION_SIZE) {
+		env->restart();// 重置整个环境
+		end_index = start_index + SUBPOPULATION_SIZE;
+
+		// test_index：在slices中的索引
+		vector<future<double>> locker;
+		for (int test_index = start_index; test_index < end_index&&test_index<slices.size(); test_index++) {
+			locker.clear();
+				ModuleInfo & module_info = slices[test_index];
+				string save_path = base_path + test_dir_name + to_string( module_info.generation)+"-"+to_string(module_info.index_in_population) + "-" +to_string( module_info.rank)+".csv";
+			//Module* module_be_test = module_info.the_module;
+
+			// 多线程优化
+			
+			//test_single_module(module_info, test_index - start_index, env, save_path);
+				locker.emplace_back(std::move( pool.enqueue(test_single_module, module_info, test_index - start_index, env, save_path)));
+		}
+		// 等待这一批次
+		for (auto& lock : locker)
+			lock.get();
+	}
+}
+
+bool cmpfunc(const  pair<double,int>& a, const pair<double, int>& b)
+{
+	return (a.first - b.first)>0;
+}
+
+void save_module_to_slices(Unified_Neural_Model* agent, int rank_of_all, std::vector<std::pair<double, int>>& situation, std::vector<ModuleInfo>& slices) {
+	ModuleInfo choose;
+	choose.generation = agent->generation;
+	choose.rank = double(rank_of_all) / SUBPOPULATION_SIZE;
+	choose.the_module = agent->subpopulation[0][situation[rank_of_all].second]->clone();
+	choose.index_in_population = situation[rank_of_all].second;
+	slices.push_back(choose);
+}
+
 int main()
 {
+	time_t time_now = time(0);
+#ifdef _WIN32
+	string base_path = string("C:\\Users\\QinHuoBin\\source\\repos\\ConsoleApplication2\\ConsoleApplication2\\dna_visual\\") + to_string(time_now) + '\\';
+#else
+	string base_path = string("/mnt/c/Users/QinHuoBin/source/repos/ConsoleApplication2/ConsoleApplication2/dna_visual/") + to_string(time_now) + '/';
+#endif
 	//int trials_to_change_maze_states= 10000;
 	//main_log_file = fopen("log.txt", "w");
 
@@ -144,7 +283,7 @@ int main()
 	//int trials=200000;
 	//int trials=200;
 	//int trials=500;
-	int trials = 1000;
+	int trials = 10000;
 	//int trials=100000;
 
 	int number_of_observation_vars;
@@ -157,19 +296,24 @@ int main()
 	//double reward = env->step(NULL);// 虚拟市场不需要初始的step
 
 	// create thread pool with 4 worker threads
-	ThreadPool pool(8);
+	
 
 	//agent->print();
 	auto time_mark = std::chrono::system_clock::now();
 
 	double rewards[SUBPOPULATION_SIZE];
 
+
+	// 在不同代数，对不同fitness排名的子代进行切片，在测试环境中验证其有效性
+	vector<ModuleInfo> slices;
+
+
 	// 进行trials次进化
 	// 每次进化周期中，会在内循环对每一个个体进行测试
 	// 执行agent->endEpisode后，如果当agent->generation变化之后，种群发生了进化，并发生了进化
 	//	此时调用env中的函数，让time进行下n刻
 	// 否则当agent->generation不变化，则还是在训练同一批个体，让env进行倒带，给下一个个体使用
-	for (int this_generation = 0; this_generation < trials;)
+	for (int this_generation = 0; this_generation <= trials;)
 	{
 		double accum_reward = 0; // 一代中各个个体reward之和
 		// 对每个个体进行训练
@@ -188,20 +332,40 @@ int main()
 		}
 
 		// 统计特征值并输出
+		// 并且分层地放进切片中
 		if (this_generation % 100 == 0)
 		{
-			double best = rewards[0], average = 0, worst = rewards[0];
-
+			// pair<fitness,index>
+			vector<pair<double, int>> situation;
+			double average_of_all = 0;
 			for (int i = 0; i < SUBPOPULATION_SIZE; i++)
 			{
-				if (rewards[i] > best)
-					best = rewards[i];
-				if (rewards[i] < worst)
-					worst = rewards[i];
-				average += rewards[i];
+				situation.push_back(pair<double, int>(rewards[i], i));
+				average_of_all += rewards[i];
 			}
-			average /= SUBPOPULATION_SIZE;
-			printf("%d best=%lf average=%lf worst=%lf\n", this_generation, best, average, worst);
+			sort(situation.begin(), situation.end(), cmpfunc);
+			
+			average_of_all /= SUBPOPULATION_SIZE;
+			printf("%d best=%lf average=%lf worst=%lf\n", this_generation, situation.front().first, average_of_all, situation.back().first);
+			
+			// 选出最好的10%
+			int ten_percent_quantity = SUBPOPULATION_SIZE / 10;
+			for (int rank_of_all = 0; rank_of_all < ten_percent_quantity; rank_of_all++)
+			{
+				save_module_to_slices(agent, rank_of_all, situation, slices);
+			}
+
+			// 选出平庸的10%
+			for (int rank_of_all = SUBPOPULATION_SIZE*0.45; rank_of_all < SUBPOPULATION_SIZE * 0.45 + ten_percent_quantity; rank_of_all++)
+			{
+				save_module_to_slices(agent, rank_of_all, situation, slices);
+			}
+
+			// 选出最差的10%
+			for (int rank_of_all = SUBPOPULATION_SIZE-ten_percent_quantity; rank_of_all < SUBPOPULATION_SIZE ; rank_of_all++)
+			{
+				save_module_to_slices(agent, rank_of_all, situation, slices);
+			}
 		}
 
 		// 完成一代后，进行进化
@@ -235,7 +399,13 @@ int main()
 	}
 
 	//agent->saveAgent("dna_best_individual");
-	agent->save_all_agents();
+	
+
+
+
+	//agent->save_all_agents(base_path);
+
+	test_slices(slices, env, base_path);
 
 	//printf("reward average %f\n",reward_sum/(double)trials);
 	//printf("step average %f\n",step_sum/(double)trials);

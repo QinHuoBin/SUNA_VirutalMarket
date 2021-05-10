@@ -12,6 +12,7 @@
 #include"modules/Module.h"
 #include"../parameters.h"
 #include"self_organized_systems/Novelty_Map.h"
+#include<string>
 
 //#include"unistd.h"
 //#include"sys/wait.h"
@@ -86,7 +87,7 @@ class Unified_Neural_Model : public Reinforcement_Agent
 		//static void save_individual(Module* individual, double this_tmp_fitness, int order, std::string base_path);
 
 		// 调试用
-		void save_all_agents();
+		void save_all_agents(std::string base_path);
 		// void static save_individual(Module *individual, string base_path);
 
 };

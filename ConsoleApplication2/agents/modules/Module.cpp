@@ -1,4 +1,4 @@
-
+﻿
 #include "Module.h"
 
 #include <chrono>
@@ -6,12 +6,20 @@
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 
+
 // the dna_allocated_length is for both n and c, therefore its value is equivalent to the longest length
 Module::Module(int number_of_inputs, int number_of_outputs, neuron *n, connection *c, int dna_allocated_length)
 {
 	this->n = n;
 	this->c = c;
 	this->allocated_space = dna_allocated_length;
+
+	if (number_of_inputs <= 0 || number_of_outputs <= 0) {
+		printf("number_of_inputs <= 0 || number_of_outputs <= 0");
+		exit(-1);
+	}
+	this->number_of_inputs = number_of_inputs;
+	this->number_of_outputs = number_of_outputs;
 
 	//if random was not set, return error
 	if (random == NULL)
@@ -72,6 +80,13 @@ Module::Module(int number_of_inputs, int number_of_outputs, neuron *n, connectio
 Module::Module(int number_of_inputs, int number_of_outputs, int suggested_allocation_length)
 {
 	this->allocated_space = suggested_allocation_length;
+
+	if (number_of_inputs <= 0 || number_of_outputs <= 0) {
+		printf("number_of_inputs <= 0 || number_of_outputs <= 0");
+		exit(-1);
+	}
+	this->number_of_inputs = number_of_inputs;
+	this->number_of_outputs = number_of_outputs;
 
 	this->n = (neuron *)malloc(allocated_space * sizeof(neuron));
 	this->c = (connection *)malloc(allocated_space * sizeof(connection));
@@ -158,6 +173,21 @@ void print_delta_time2(int line_num)
 	aa = std::chrono::system_clock::now();
 }
 
+// 返回和这个一样的复制品
+Module* Module::clone()
+{
+	Module* new_module= new Module(number_of_inputs, number_of_outputs, INITIAL_ALLOCATION_LENGTH);
+	new_module->clone(this);
+
+	//// test
+	//printf("测试");
+	//printDNA("be_cloned");
+	//new_module->printDNA("cloned");
+
+	return new_module;
+}
+
+// 把自己复制成brother
 void Module::clone(Module *brother)
 {
 	aa = std::chrono::system_clock::now();

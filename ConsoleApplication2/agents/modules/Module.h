@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////
+﻿///////////////////////////////////////////////////////////////////
 //
 //		Modules  - create the building blocks for the system (a system is composed of a set of interconnected modules)
 //
@@ -29,6 +29,8 @@
 
 struct connection_type {int index; int type;} ;
 
+
+
 class Module
 {
 	public:
@@ -38,6 +40,9 @@ class Module
 		~Module();	
 
 		static void setRandom(Random* random);
+
+		int number_of_inputs;
+		int number_of_outputs;
 
 		int allocated_space;
 		int max_neuron_id;
@@ -82,6 +87,8 @@ class Module
 		//int* map_id_to_dna;
 		int* primer_list;
 
+		Module* clone();
+
 		void clone(Module* brother);
 		void process(double* input, double* output);
 		void structuralMutation();
@@ -118,5 +125,7 @@ class Module
 		void printInternalStates();
 		void printFiredStates();
 };
+
+
 
 #endif

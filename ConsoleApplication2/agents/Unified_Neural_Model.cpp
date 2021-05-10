@@ -74,7 +74,7 @@ void Unified_Neural_Model::savePopulation()
 
 #include "../ThreadPool.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 string dna = "dna\\";
 string dot = "dot\\";
 string png = "png\\";
@@ -99,18 +99,18 @@ void save_individual(Module *individual,double this_tmp_fitness,int order, strin
 	string png_path = base_path +png+ name + ".png";
 	system(("dot " + dot_path + " -Tpng -o " + png_path).c_str());
 }
-void Unified_Neural_Model::save_all_agents()
+void Unified_Neural_Model::save_all_agents(string base_path)
 {
 	ThreadPool pool(16);
-	time_t time_now = time(0);
 	
-#ifdef WIN32
-	string base_path = string("C:\\Users\\QinHuoBin\\source\\repos\\ConsoleApplication2\\ConsoleApplication2\\dna_visual\\") + to_string(time_now) + '\\';
+	
+#ifdef _WIN32
+	//string base_path = string("C:\\Users\\QinHuoBin\\source\\repos\\ConsoleApplication2\\ConsoleApplication2\\dna_visual\\") + to_string(time_now) + '\\';
 	system(("mkdir " + base_path + dna).c_str());
 	system(("mkdir " + base_path + dot).c_str());
 	system(("mkdir " + base_path + png).c_str());
 #else
-	string base_path = string("/mnt/c/Users/QinHuoBin/source/repos/ConsoleApplication2/ConsoleApplication2/dna_visual/") + to_string(time_now) + '/';
+	//string base_path = string("/mnt/c/Users/QinHuoBin/source/repos/ConsoleApplication2/ConsoleApplication2/dna_visual/") + to_string(time_now) + '/';
 	system(("mkdir -p " + base_path + dna).c_str());// -p 递归创建
 	system(("mkdir -p " + base_path + dot).c_str());
 	system(("mkdir -p " + base_path + png).c_str());
@@ -631,6 +631,7 @@ void Unified_Neural_Model::spectrumDiversityEvolve()
 		tmp_subpopulation[0][i]->updatePrimerList();
 
 		//weight mutation
+		// 创新网络群的子代都进行变异
 		tmp_subpopulation[0][i]->weightMutation();
 		pdt();
 	}

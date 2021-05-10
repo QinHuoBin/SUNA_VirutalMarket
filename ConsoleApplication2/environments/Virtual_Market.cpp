@@ -7,6 +7,8 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::wstring;
+
+#include<math.h>
 Virtual_Market::Virtual_Market(Random *random)
 {
     this->random = random;
@@ -23,13 +25,31 @@ Virtual_Market::Virtual_Market(Random *random)
     // MarketPrice_vector_sample.clear();
   //rfd::save_binary_tick_file(path, code);
 
-   rfd::read_binary_tick_file(MarketPrice_vector, path, code);
+  // rfd::read_binary_tick_file(MarketPrice_vector, path, code);
 
-    price_size = rfd::resample(MarketPrice_vector, MarketPrice_vector_sample, 60);
+   // price_size = rfd::resample(MarketPrice_vector, MarketPrice_vector_sample, 60);
 
+    // 以下代码说明SUNA似乎无效？？？？？？？
+    for (int i = 0; i < 3000; i++) {
+        rfd::MarketPrice a;
+        a.LastPrice = sin(float(i)*0.01)+2;
+        MarketPrice_vector_sample.push_back(a);
+    }
+    price_size = 3000;
     MarketPrice_vector.clear(); // 清空，防止误使用
 
-    MAX_STEPS = 1000; // 每次运行1/3
+//#ifdef _DEBUG
+//
+//#ifdef _WIN32
+//    MAX_STEPS = 10; // 每次运行1/3
+//#else
+//    MAX_STEPS = 1000; // 每次运行1/3
+//#endif
+//
+//#else
+//    MAX_STEPS = 1000;
+//#endif
+     MAX_STEPS = 100;
     //MAX_STEPS= price_size/3;// 每次运行1/3
 
     P(price_size);
@@ -68,11 +88,11 @@ double Virtual_Market::step(double *action, size_t the_individual)
     money[the_individual] += profit;
 
     // 根据agent的动作改变仓位
-    if (action[0] > 1)
+    if (action[0] < -1)
     {
         position_hold[the_individual] = 1; //多仓
     }
-    else if (action[0] < -1)
+    else if (action[0] > 1)
     {
         position_hold[the_individual] = -1; //空仓
     }
@@ -141,6 +161,7 @@ void Virtual_Market::flush_observations(size_t the_individual)
     observations[the_individual][N_TICK_INPUT] = money[the_individual];
 }
 
+// 重置此环境的所有状态，数据不变
 double Virtual_Market::restart()
 {
 
