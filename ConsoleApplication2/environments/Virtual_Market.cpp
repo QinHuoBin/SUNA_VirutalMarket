@@ -30,6 +30,7 @@ Virtual_Market::Virtual_Market(Random *random)
    // price_size = rfd::resample(MarketPrice_vector, MarketPrice_vector_sample, 60);
 
     // 以下代码说明SUNA似乎无效？？？？？？？
+    // 说明：SUNA似乎很难保持优秀基因，有可能会抛弃最好的，剩下的一事无成。
     for (int i = 0; i < 3000; i++) {
         rfd::MarketPrice a;
         a.LastPrice = sin(float(i)*0.01)+2;
@@ -82,6 +83,9 @@ double Virtual_Market::step(double *action, size_t the_individual)
     {
         return 0;
     }
+
+    // 测试代码
+    //return action[0] < -1 ? 1 : -1;
 
     // 根据仓位方向和仓位价值获取利润
     double profit = trade(position_hold[the_individual], money[the_individual], the_individual);

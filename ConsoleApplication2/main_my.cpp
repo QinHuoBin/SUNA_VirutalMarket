@@ -322,12 +322,14 @@ int main()
 		{
 			//rewards[the_individual]=aaaa(agent, env, the_individual);
 			std::future<double> result = pool.enqueue(aaaa, agent, env, the_individual);
+			//printf("放入%d\n", the_individual);
 			results.emplace_back(std::move(result));
 		}
 
 		for (int the_individual = 0; the_individual < SUBPOPULATION_SIZE; the_individual++)
 		{
 			double a= results[the_individual].get();
+			//printf("---------取出%d\n", the_individual);
 			rewards[the_individual] = a;
 		}
 
@@ -403,9 +405,9 @@ int main()
 
 
 
-	//agent->save_all_agents(base_path);
+	agent->save_all_agents(base_path);
 
-	test_slices(slices, env, base_path);
+	//test_slices(slices, env, base_path);
 
 	//printf("reward average %f\n",reward_sum/(double)trials);
 	//printf("step average %f\n",step_sum/(double)trials);

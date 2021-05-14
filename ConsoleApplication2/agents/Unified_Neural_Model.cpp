@@ -84,7 +84,7 @@ string dot = "dot/";
 string png = "png/";
 #endif
 
-// 注意tmp_fitness才是最新的fitness
+// tmp_fitness只有在进化时才进来新值，平时用fitness
 void save_individual(Module *individual,double this_tmp_fitness,int order, string base_path)
 {
 	//double this_fitness = Unified_Neural_Model::fitness[MAIN_SUBPOP][i];
@@ -120,10 +120,10 @@ void Unified_Neural_Model::save_all_agents(string base_path)
 	for (int i = 0; i < SUBPOPULATION_SIZE; i++)
 	//	for (int i = 0; i < 2; i++)
 	{
-		auto f=pool.enqueue(save_individual,subpopulation[MAIN_SUBPOP][i],tmp_fitness[MAIN_SUBPOP][i],i, base_path);
+		auto f=pool.enqueue(save_individual,subpopulation[MAIN_SUBPOP][i],fitness[MAIN_SUBPOP][i],i, base_path);
 		futures.emplace_back(std::move(f));
 	}
-	string best_individual_name = "best-individual_"+to_string(tmp_fitness[MAIN_SUBPOP][best_index] + 10000) + '_' + to_string(best_index);
+	string best_individual_name = "best-individual_"+to_string(fitness[MAIN_SUBPOP][best_index] + 10000) + '_' + to_string(best_index);
 	string best_individual_dna_path = base_path + dna + best_individual_name + ".dna";
 	string best_individual_dot_path = base_path + dot + best_individual_name + ".dot";
 	string best_individual_png_path = base_path + png + best_individual_name + ".png";
@@ -231,7 +231,8 @@ void Unified_Neural_Model::endEpisode_my(double reward, int the_individual)
 	//update reward
 	tmp_fitness[testing_subpop][the_individual] += reward;
 
-	subpopulation[testing_subpop][the_individual]->clearMemory();
+	// 这个不用吧？？？？
+	//subpopulation[testing_subpop][the_individual]->clearMemory();
 }
 
 void Unified_Neural_Model::endEpisode(double reward)
