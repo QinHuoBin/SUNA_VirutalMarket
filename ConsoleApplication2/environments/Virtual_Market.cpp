@@ -110,7 +110,12 @@ double Virtual_Market::step(double *action, size_t the_individual)
 
     time[the_individual]++;
 
-    return profit;
+    // 测试代码
+    if (profit > 0)
+        return 1;
+    else
+        - 1;
+    //return profit;
 }
 
 double Virtual_Market::trade(int _position_hold, double _money, size_t the_individual)
