@@ -22,11 +22,16 @@
 //#include"dSFMT/dSFMT.h"
 
 
-#include"cstdlib"
+
+
+
+#include <time.h>
+#include<random>
+#include <thread>
 class Random 
 {
 	private:
-	
+		std::default_random_engine generator;
 
 	public:
 		
