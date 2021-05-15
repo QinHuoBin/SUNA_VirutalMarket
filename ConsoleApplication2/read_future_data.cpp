@@ -138,7 +138,7 @@ void rfd::fix_time_problem(vector<rfd::MarketPrice> &MarketPrice_vector)
       rfd::MarketPrice &last_tick = MarketPrice_vector[x - 1];
       int days_interval = (tick.datetime - last_tick.datetime) / (24 * 3600);
 
-      tick.datetime -= days_interval * 24 * 3600;
+     tick.datetime -= (long long) days_interval * 24 * 3600;
       continue;
     }
   }
@@ -202,15 +202,12 @@ size_t rfd::get_satisfied_paths(vector<fs::path> &path_vector, const wstring &pa
 
   //cout << filename_to_find << endl;
 
+#ifdef _WIN32
   for (auto &f : fs::directory_iterator(path))
   {
     if (f.is_directory())
     {
-#ifdef _WIN32
         get_satisfied_paths(path_vector, f.path().c_str(), code);
-#else
-        get_satisfied_paths(path_vector,String2WString( f.path().c_str()), code);
-#endif
       continue;
     }
     else
@@ -222,6 +219,29 @@ size_t rfd::get_satisfied_paths(vector<fs::path> &path_vector, const wstring &pa
       }
     }
   }
+
+#else
+  auto a = WString2String(path);
+  for (auto& f : fs::directory_iterator(a))
+  {
+      if (f.is_directory())
+      {
+
+          get_satisfied_paths(path_vector, String2WString(f.path().c_str()), code);
+
+          continue;
+      }
+      else
+      {
+          string filename = f.path().filename().string();
+          if (filename == filename_to_find)
+          {
+              path_vector.push_back(f.path());
+          }
+      }
+  }
+ 
+#endif
   std::sort(path_vector.begin(), path_vector.end(), sort_by_date);
 
   return path_vector.size();

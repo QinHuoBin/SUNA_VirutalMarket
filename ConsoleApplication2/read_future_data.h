@@ -1,50 +1,50 @@
-// ¹¦ÄÜ£º¶ÁÈ¡ÔÚ
+ï»¿// åŠŸèƒ½ï¼šè¯»å–åœ¨
 //http://www.pythonpai.com/topic/4206/%E9%87%8F%E5%8C%96%E7%88%B1%E5%A5%BD%E8%80%85%E7%A6%8F%E5%88%A9%E8%B4%B4-%E9%87%8F%E5%8C%96%E4%BA%A4%E6%98%93%E4%BB%A3%E7%A0%81-%E5%B7%A5%E5%85%B7-2012-2020%E5%B9%B4%E6%9C%9F%E8%B4%A7%E5%85%A8%E5%93%81%E7%A7%8Dtick%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB
-// ÏÂÔØµÄÆÚ»õÊı¾İ£¬ÆäÖĞÃ¿¸öcsvµÄ×Ö¶ÎÎª£º
+// ä¸‹è½½çš„æœŸè´§æ•°æ®ï¼Œå…¶ä¸­æ¯ä¸ªcsvçš„å­—æ®µä¸ºï¼š
 /*
-CSVÊı¾İÎÄ¼ş×Ö¶ÎË³Ğò£º
-localtime (±¾»úĞ´ÈëTICKµÄÊ±¼ä),
-InstrumentID (ºÏÔ¼Ãû),
-TradingDay (½»Ò×ÈÕ),
-ActionDay (ÒµÎñÈÕÆÚ),
-UpdateTime £¨Ê±¼ä£©,
-UpdateMillisec£¨Ê±¼äºÁÃë£©,
-LastPrice £¨×îĞÂ¼Û£©,
-Volume£¨³É½»Á¿£© ,
-HighestPrice £¨×î¸ß¼Û£©,
-LowestPrice£¨×îµÍ¼Û£© ,
-OpenPrice£¨¿ªÅÌ¼Û£© ,
-ClosePrice£¨ÊÕÅÌ¼Û£©,
-AveragePrice£¨¾ù¼Û£©,
-AskPrice1£¨ÉêÂô¼ÛÒ»£©,
-AskVolume1£¨ÉêÂôÁ¿Ò»£©,
-BidPrice1£¨ÉêÂò¼ÛÒ»£©,
-BidVolume1£¨ÉêÂòÁ¿Ò»£©,
-UpperLimitPrice£¨ÕÇÍ£°å¼Û£©
-LowerLimitPrice£¨µøÍ£°å¼Û£©
-OpenInterest£¨³Ö²ÖÁ¿£©,
-Turnover£¨³É½»½ğ¶î£©,
-PreClosePrice (×òÊÕÅÌ),
-PreOpenInterest (×ò³Ö²Ö),
-PreSettlementPrice (ÉÏ´Î½áËã¼Û),
+CSVæ•°æ®æ–‡ä»¶å­—æ®µé¡ºåºï¼š
+localtime (æœ¬æœºå†™å…¥TICKçš„æ—¶é—´),
+InstrumentID (åˆçº¦å),
+TradingDay (äº¤æ˜“æ—¥),
+ActionDay (ä¸šåŠ¡æ—¥æœŸ),
+UpdateTime ï¼ˆæ—¶é—´ï¼‰,
+UpdateMillisecï¼ˆæ—¶é—´æ¯«ç§’ï¼‰,
+LastPrice ï¼ˆæœ€æ–°ä»·ï¼‰,
+Volumeï¼ˆæˆäº¤é‡ï¼‰ ,
+HighestPrice ï¼ˆæœ€é«˜ä»·ï¼‰,
+LowestPriceï¼ˆæœ€ä½ä»·ï¼‰ ,
+OpenPriceï¼ˆå¼€ç›˜ä»·ï¼‰ ,
+ClosePriceï¼ˆæ”¶ç›˜ä»·ï¼‰,
+AveragePriceï¼ˆå‡ä»·ï¼‰,
+AskPrice1ï¼ˆç”³å–ä»·ä¸€ï¼‰,
+AskVolume1ï¼ˆç”³å–é‡ä¸€ï¼‰,
+BidPrice1ï¼ˆç”³ä¹°ä»·ä¸€ï¼‰,
+BidVolume1ï¼ˆç”³ä¹°é‡ä¸€ï¼‰,
+UpperLimitPriceï¼ˆæ¶¨åœæ¿ä»·ï¼‰
+LowerLimitPriceï¼ˆè·Œåœæ¿ä»·ï¼‰
+OpenInterestï¼ˆæŒä»“é‡ï¼‰,
+Turnoverï¼ˆæˆäº¤é‡‘é¢ï¼‰,
+PreClosePrice (æ˜¨æ”¶ç›˜),
+PreOpenInterest (æ˜¨æŒä»“),
+PreSettlementPrice (ä¸Šæ¬¡ç»“ç®—ä»·),
 
 */
-// 2021Äê4ÔÂ4ÈÕ 15µã54·Ö
+// 2021å¹´4æœˆ4æ—¥ 15ç‚¹54åˆ†
 
 /*
-±àÒë·½·¨£ºg++ read_future_data.cpp -o read_future_data -lpthread
-¼ÇµÃ¼ÓÉÏ-lpthread
+ç¼–è¯‘æ–¹æ³•ï¼šg++ read_future_data.cpp -o read_future_data -lpthread
+è®°å¾—åŠ ä¸Š-lpthread
 
-c++µÄcsv½âÎöÆ÷£º
+c++çš„csvè§£æå™¨ï¼š
     https://github.com/ben-strasser/fast-cpp-csv-parser
 
-c++µÄdate/time´¦Àí¹¤¾ß
+c++çš„date/timeå¤„ç†å·¥å…·
     https://github.com/HowardHinnant/date
 */
 #ifndef READ_FUTURE_DATA_H
 #define READ_FUTURE_DATA_H
 
-// ¹Ø±ÕcsvµÄ¶àÏß³Ì¶ÁÈ¡
+// å…³é—­csvçš„å¤šçº¿ç¨‹è¯»å–
 #define CSV_IO_NO_THREAD
 #include "csv.h"
 #include <stdlib.h>
@@ -67,13 +67,13 @@ namespace rfd
         float Volume;
     } MarketPrice;
 
-    // ¶ÁÈ¡£¬²¢±£´ætickÎª¶ş½øÖÆÎÄ¼ş
+    // è¯»å–ï¼Œå¹¶ä¿å­˜tickä¸ºäºŒè¿›åˆ¶æ–‡ä»¶
     void save_binary_tick_file(const std::wstring &path, const std::string &code);
-    // Ö±½Ó¶ÁÈ¡¶ş½øÖÆÎÄ¼ş
+    // ç›´æ¥è¯»å–äºŒè¿›åˆ¶æ–‡ä»¶
     size_t read_binary_tick_file(std::vector<MarketPrice> &MarketPrice_vector, const std::wstring &path, const std::string &code);
 
-    // ÖØĞÂ¶ÁÈ¡ÎÄ±¾ÎÄ¼ş
-    // Õâ¸öº¯ÊıÓÃÓÚÊÕ¼¯Ö¸¶¨Ä¿Â¼£¨µİ¹é£©ÏÂËùÓĞµÄcode.csvµÄÊı¾İ
+    // é‡æ–°è¯»å–æ–‡æœ¬æ–‡ä»¶
+    // è¿™ä¸ªå‡½æ•°ç”¨äºæ”¶é›†æŒ‡å®šç›®å½•ï¼ˆé€’å½’ï¼‰ä¸‹æ‰€æœ‰çš„code.csvçš„æ•°æ®
     size_t collect_all_ticks(std::vector<MarketPrice> &MarketPrice_vector, const std::wstring &path, const std::string &code);
 
     void fix_time_problem(std::vector<MarketPrice> &MarketPrice_vector);

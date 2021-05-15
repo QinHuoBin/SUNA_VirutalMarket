@@ -1,4 +1,4 @@
-
+ï»¿
 #include "Unified_Neural_Model.h"
 #include <string>
 using std::string;
@@ -84,7 +84,7 @@ string dot = "dot/";
 string png = "png/";
 #endif
 
-// tmp_fitnessÖ»ÓĞÔÚ½ø»¯Ê±²Å½øÀ´ĞÂÖµ£¬Æ½Ê±ÓÃfitness
+// tmp_fitnessåªæœ‰åœ¨è¿›åŒ–æ—¶æ‰è¿›æ¥æ–°å€¼ï¼Œå¹³æ—¶ç”¨fitness
 void save_individual(Module *individual,double this_tmp_fitness,int order, string base_path)
 {
 	//double this_fitness = Unified_Neural_Model::fitness[MAIN_SUBPOP][i];
@@ -111,7 +111,7 @@ void Unified_Neural_Model::save_all_agents(string base_path)
 	system(("mkdir " + base_path + png).c_str());
 #else
 	//string base_path = string("/mnt/c/Users/QinHuoBin/source/repos/ConsoleApplication2/ConsoleApplication2/dna_visual/") + to_string(time_now) + '/';
-	system(("mkdir -p " + base_path + dna).c_str());// -p µİ¹é´´½¨
+	system(("mkdir -p " + base_path + dna).c_str());// -p é€’å½’åˆ›å»º
 	system(("mkdir -p " + base_path + dot).c_str());
 	system(("mkdir -p " + base_path + png).c_str());
 #endif
@@ -188,7 +188,7 @@ void Unified_Neural_Model::init(int number_of_observation_vars, int number_of_ac
 		subpopulation[i] = new Module *[SUBPOPULATION_SIZE];
 		tmp_subpopulation[i] = new Module *[SUBPOPULATION_SIZE];
 		fitness[i] = (double *)malloc(sizeof(double) * SUBPOPULATION_SIZE);
-		// ĞŞ¸´ÕâÀïµÄÎ´³õÊ¼»¯Ê¹ÓÃ
+		// ä¿®å¤è¿™é‡Œçš„æœªåˆå§‹åŒ–ä½¿ç”¨
 		//tmp_fitness[i] = (double *)malloc(sizeof(double) * SUBPOPULATION_SIZE);
 		tmp_fitness[i] = (double *)calloc(SUBPOPULATION_SIZE, sizeof(double));
 		for (int j = 0; j < SUBPOPULATION_SIZE; ++j)
@@ -231,7 +231,7 @@ void Unified_Neural_Model::endEpisode_my(double reward, int the_individual)
 	//update reward
 	tmp_fitness[testing_subpop][the_individual] += reward;
 
-	// Õâ¸ö²»ÓÃ°É£¿£¿£¿£¿
+	// è¿™ä¸ªä¸ç”¨å§ï¼Ÿï¼Ÿï¼Ÿï¼Ÿ
 	//subpopulation[testing_subpop][the_individual]->clearMemory();
 }
 
@@ -245,7 +245,7 @@ void Unified_Neural_Model::endEpisode(double reward)
 	//printf("%f\n",tmp_fitness[testing_subpop][testing_individual]);
 
 	//average
-	// Ô­°æ´úÂëÊÊÓÃÓÚ¸öÌåÁ¬Ğø½øĞĞ¶à¸öEPISODES£¬²»±Ø£¬É¾È¥
+	// åŸç‰ˆä»£ç é€‚ç”¨äºä¸ªä½“è¿ç»­è¿›è¡Œå¤šä¸ªEPISODESï¼Œä¸å¿…ï¼Œåˆ å»
 	if (step_counter >= EPISODES_PER_INDIVIDUAL)
 	{
 		tmp_fitness[testing_subpop][testing_individual] /= (double)step_counter;
@@ -447,7 +447,7 @@ void Unified_Neural_Model::spectrumDiversityEvolve()
 			//selected_individuals[i][j][0]=-1;
 
 			//reset the fitness
-			// fitnessÓ¦ÊÇÀÛ¼ÆµÄ£¬´ıĞŞ¸Ä
+			// fitnessåº”æ˜¯ç´¯è®¡çš„ï¼Œå¾…ä¿®æ”¹
 			tmp_fitness[i][j] = 0.0;
 
 			//printf("%d %f\n", j, fitness[i][j]);
@@ -621,7 +621,7 @@ void Unified_Neural_Model::spectrumDiversityEvolve()
 		pdt();
 
 		//int number_of_mutations= random->uniform(1, NUMBER_OF_STEP_MUTATIONS);
-		// ĞŞ¸ÄÕâÀïÒÔÑ°Çó¸üºÃĞ§¹û
+		// ä¿®æ”¹è¿™é‡Œä»¥å¯»æ±‚æ›´å¥½æ•ˆæœ
 		int number_of_mutations = NUMBER_OF_STEP_MUTATIONS;
 
 		//structural mutation
@@ -632,7 +632,7 @@ void Unified_Neural_Model::spectrumDiversityEvolve()
 		tmp_subpopulation[0][i]->updatePrimerList();
 
 		//weight mutation
-		// ´´ĞÂÍøÂçÈºµÄ×Ó´ú¶¼½øĞĞ±äÒì
+		// åˆ›æ–°ç½‘ç»œç¾¤çš„å­ä»£éƒ½è¿›è¡Œå˜å¼‚
 		tmp_subpopulation[0][i]->weightMutation();
 		pdt();
 	}

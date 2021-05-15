@@ -21,35 +21,30 @@ Virtual_Market::Virtual_Market(Random *random)
 #endif
     string code = "c2009";
 
-    // size_t a=rfd::collect_all_ticks(MarketPrice_vector, path, code);
-    // MarketPrice_vector_sample.clear();
-  //rfd::save_binary_tick_file(path, code);
+    // 初始化流程
+    //MarketPrice_vector_sample.clear();
+    //rfd::save_binary_tick_file(path, code);
+    //rfd::read_binary_tick_file(MarketPrice_vector, path, code);
+    //price_size = rfd::resample(MarketPrice_vector, MarketPrice_vector_sample, 60);
 
-  // rfd::read_binary_tick_file(MarketPrice_vector, path, code);
-
-   // price_size = rfd::resample(MarketPrice_vector, MarketPrice_vector_sample, 60);
+    // 正常流程
+    MarketPrice_vector_sample.clear();
+    //rfd::save_binary_tick_file(path, code);
+    rfd::read_binary_tick_file(MarketPrice_vector, path, code);
+    price_size = rfd::resample(MarketPrice_vector, MarketPrice_vector_sample, 60);
 
     // 以下代码说明SUNA似乎无效？？？？？？？
+    // 是我奖励方式有问题
     // 说明：SUNA似乎很难保持优秀基因，有可能会抛弃最好的，剩下的一事无成。
-    for (int i = 0; i < 3000; i++) {
-        rfd::MarketPrice a;
-        a.LastPrice = sin(float(i)*0.01)+2;
-        MarketPrice_vector_sample.push_back(a);
-    }
-    price_size = 3000;
+    //for (int i = 0; i < 3000; i++) {
+    //    rfd::MarketPrice a;
+    //    a.LastPrice = sin(float(i)*0.01)+2;
+    //    MarketPrice_vector_sample.push_back(a);
+    //}
+    // price_size = 3000;
+
     MarketPrice_vector.clear(); // 清空，防止误使用
 
-//#ifdef _DEBUG
-//
-//#ifdef _WIN32
-//    MAX_STEPS = 10; // 每次运行1/3
-//#else
-//    MAX_STEPS = 1000; // 每次运行1/3
-//#endif
-//
-//#else
-//    MAX_STEPS = 1000;
-//#endif
      MAX_STEPS = 100;
     //MAX_STEPS= price_size/3;// 每次运行1/3
 
@@ -92,11 +87,11 @@ double Virtual_Market::step(double *action, size_t the_individual)
     money[the_individual] += profit;
 
     // 根据agent的动作改变仓位
-    if (action[0] < -1)
+    if (action[0] >1)
     {
         position_hold[the_individual] = 1; //多仓
     }
-    else if (action[0] > 1)
+    else if (action[0] <-1)
     {
         position_hold[the_individual] = -1; //空仓
     }
@@ -114,17 +109,26 @@ double Virtual_Market::step(double *action, size_t the_individual)
     if (profit > 0)
         return 1;
     else
-        - 1;
+       return - 1;
     //return profit;
 }
 
 double Virtual_Market::trade(int _position_hold, double _money, size_t the_individual)
 {
+
     auto a = get_price(time[the_individual]);
     auto b = get_price(time[the_individual] - 1);
-    double pct = (a - b) / b;
-    pct *= _position_hold;
-    return _money * (pct);
+
+    // 不能使用(a>b)*_position_hold，a>b是bool值
+    // _position_hold=0，也给惩罚
+    return (a - b) * _position_hold>0?1:-1;
+
+    // 测试中。。。。。。
+    //auto a = get_price(time[the_individual]);
+    //auto b = get_price(time[the_individual] - 1);
+    //double pct = (a - b) / b;
+    //pct *= _position_hold;
+    //return _money * (pct);
 }
 
 // 进行倒带，重置money和position_hold

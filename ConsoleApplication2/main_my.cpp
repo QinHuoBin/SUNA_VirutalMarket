@@ -283,7 +283,7 @@ int main()
 	//int trials=200000;
 	//int trials=200;
 	//int trials=500;
-	int trials = 2000;
+	int trials = 200000;
 	//int trials=100000;
 
 	int number_of_observation_vars;
@@ -402,12 +402,12 @@ int main()
 
 	//agent->saveAgent("dna_best_individual");
 	
-
+	test_slices(slices, env, base_path);
 
 
 	agent->save_all_agents(base_path);
 
-	//test_slices(slices, env, base_path);
+	
 
 	//printf("reward average %f\n",reward_sum/(double)trials);
 	//printf("step average %f\n",step_sum/(double)trials);
