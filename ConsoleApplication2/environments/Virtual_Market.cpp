@@ -45,7 +45,7 @@ Virtual_Market::Virtual_Market(Random *random)
 
     MarketPrice_vector.clear(); // 清空，防止误使用
 
-     MAX_STEPS = 100;
+     MAX_STEPS = 300;
     //MAX_STEPS= price_size/3;// 每次运行1/3
 
     P(price_size);

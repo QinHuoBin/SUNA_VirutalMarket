@@ -622,7 +622,13 @@ void Unified_Neural_Model::spectrumDiversityEvolve()
 
 		//int number_of_mutations= random->uniform(1, NUMBER_OF_STEP_MUTATIONS);
 		// 修改这里以寻求更好效果
-		int number_of_mutations = NUMBER_OF_STEP_MUTATIONS;
+		//int number_of_mutations = NUMBER_OF_STEP_MUTATIONS;
+		int number_of_mutations = (tmp_subpopulation[0][i]->number_of_connections
+			+ tmp_subpopulation[0][i]->number_of_neurons
+			+ tmp_subpopulation[0][i]->number_of_primers)*0.05;
+		//printf("number_of_mutations%d\n", number_of_mutations);
+		if (number_of_mutations < NUMBER_OF_STEP_MUTATIONS)
+			number_of_mutations = NUMBER_OF_STEP_MUTATIONS;
 
 		//structural mutation
 		for (int k = 0; k < number_of_mutations; ++k)

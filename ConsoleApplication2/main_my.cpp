@@ -283,7 +283,7 @@ int main()
 	//int trials=200000;
 	//int trials=200;
 	//int trials=500;
-	int trials = 200000;
+	int trials = 2000;
 	//int trials=100000;
 
 	int number_of_observation_vars;
